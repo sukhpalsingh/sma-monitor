@@ -44,4 +44,11 @@ return [
         ],
     ],
 
+    'inverter' => [
+        'url' => env('INVERTER_URL'),
+        'username' => env('INVERTER_USER'),
+        'password' => env('INVERTER_PASSWORD'),
+        'result_code' => env('INVERTER_RESULT_CODE'),
+        'timezone' => env('INVERTER_TIMEZONE', 'Australia/Sydney')
+    ]
 ];
