@@ -8,7 +8,7 @@ class SmaLogReaderService
 {
     private $curl = null;
 
-    private $cookieFilePath = 'sma-log-reader-cookie.txt';
+    private $cookieFilePath = 'storage/sma-log-reader-cookie.txt';
 
     private $sid = null;
 
