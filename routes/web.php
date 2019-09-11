@@ -11,8 +11,4 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
-Route::resource('login', 'LoginController');
+Route::get('/', 'InverterLogController@index');
