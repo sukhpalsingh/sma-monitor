@@ -19,6 +19,8 @@ class InverterLogController extends Controller
         $data = [];
         $labels = [];
 
+        date_default_timezone_set(config('services.inverter.timezone'));
+
         $today = Carbon::today()->startOfDay();
         $yesterday = InverterLog::where('recorded_at', '<', $today)
             ->orderBy('recorded_at', 'desc')
