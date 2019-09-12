@@ -15,27 +15,37 @@ class InverterLogController extends Controller
      */
     public function index()
     {
-        $logs = InverterLog::where('recorded_at', '>=', Carbon::today()->startOfDay()->format('Y-m-d H:i:s'))
-            ->get();
-
         $first = 0;
         $data = [];
-        foreach ($logs as $log) {
-            if ($first === 0) {
+        $labels = [];
+
+        $today = Carbon::today()->startOfDay();
+        $yesterday = InverterLog::where('recorded_at', '<', $today)
+            ->orderBy('recorded_at', 'desc')
+            ->first();
+
+        $first = $yesterday->total_yield;
+
+        $total = 0;
+        for ($i = 0; $i <= 24; $i++) {
+            $logs = InverterLog::where('recorded_at', '>=', $today->clone()->addHour($i)->format('Y-m-d H:i:s'))
+                ->where('recorded_at', '<', $today->clone()->addHour($i + 1)->format('Y-m-d H:i:s'))
+                ->get();
+
+            $yield = 0;
+            foreach ($logs as $index => $log) {
+                $yield += $log['total_yield'] - $first;
                 $first = $log['total_yield'];
-                continue;
             }
 
-            // $data[] = [
-            //     'value' => ($log['total_yield'] - $first),
-            //     'time' => $log['recorded_at']->format('H:i')
-            // ];
-            $data[] = ($log['total_yield'] - $first) / 1000;
+            $total += ($yield / 1000);
+            $data[] = $yield / 1000;
 
-            $first = $log['total_yield'];
+            $labels[] = $today->clone()->addHour($i)->format('H');
         }
-        
-        return view('inverter-logs', ['logs' => $data]);
+
+        $total = number_format($total, 2);
+        return view('inverter-logs', ['title' => Carbon::today()->format('d/m/Y') . ' (' . $total . ' KW)', 'logs' => $data, 'labels' => $labels]);
     }
 
     /**

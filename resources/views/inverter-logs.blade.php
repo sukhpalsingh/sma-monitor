@@ -9,7 +9,7 @@
     </head>
 
     <body>
-        <div style="width:800px; height: 200px; margin-top: 10px auto;">
+        <div class="chart-container" style="position: relative; height:20vh; width: 50vw; margin: 20px auto;">
             <canvas id="myChart"></canvas>
         </div>
 
@@ -19,11 +19,39 @@
             var ctx = document.getElementById('myChart');
             var myChart = new Chart(ctx, {
                 type: 'line',
+                labelString: 'kw',
                 data: {
+                    labels: [{!! "'" . implode("', '", $labels) . "'" !!}],
                     datasets: [{
-                        label: 'Today',
+                        label: '{{ $title }}',
                         data: {{ json_encode($logs, true) }},
-                    }]
+                    }],
+                   
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        xAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Month'
+                            },
+                        }],
+                        yAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Value'
+                            },
+                            ticks: {
+                                min: 0,
+                                max: 7,
+                                stepSize: 1
+                            }
+                            
+                        }]
+                    }
                 }
             });
         </script>
