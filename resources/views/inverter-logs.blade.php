@@ -9,8 +9,17 @@
     </head>
 
     <body>
-        <div class="chart-container" style="position: relative; height:20vh; width: 50vw; margin: 20px auto;">
-            <canvas id="myChart"></canvas>
+        <div class="container-fluid">
+            <div class="row">
+                <a href="/?from={{ $previousDate }}" class="btn btn-default"><</a>
+
+                @if ($nextDate !== null)
+                    <a href="/?from={{ $nextDate }}" class="btn btn-default">></a>
+                @endif
+            </div>
+            <div class="chart-container" style="position: relative; height:20vh; width: 50vw; margin: 20px auto;">
+                <canvas id="myChart"></canvas>
+            </div>
         </div>
 
         <script src="js/lib.js" type="text/javascript"></script>
