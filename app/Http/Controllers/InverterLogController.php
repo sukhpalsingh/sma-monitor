@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\InverterLogRequest;
 use App\InverterLog;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -13,7 +14,7 @@ class InverterLogController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(InverterLogRequest $request)
     {
         $first = 0;
         $data = [];
@@ -23,10 +24,16 @@ class InverterLogController extends Controller
 
         if ($request->has('from')) {
             $startDate = Carbon::createFromFormat('d-m-Y', $request->from)->startOfDay();
-            $endDate = $startDate->clone()->addWeek()->endOfDay();
+            $endDate = $startDate->clone()->endOfDay();
         } else {
             $startDate = Carbon::today()->startOfDay();
             $endDate = $startDate->clone()->endOfDay();
+        }
+
+        $nextDate = null;
+        $previousDate = $startDate->clone()->subDay()->format('d-m-Y');
+        if ($endDate->lessThan(Carbon::today()->endOfDay())) {
+            $nextDate = $endDate->clone()->addDay()->format('d-m-Y');
         }
 
         // get previous yield for comparison
@@ -55,7 +62,16 @@ class InverterLogController extends Controller
         }
 
         $total = number_format($total, 2);
-        return view('inverter-logs', ['title' => $startDate->format('d/m/Y') . ' (' . $total . ' KW)', 'logs' => $data, 'labels' => $labels]);
+        return view(
+            'inverter-logs',
+            [
+                'title' => $startDate->format('d/m/Y') . ' (' . $total . ' KW)',
+                'logs' => $data,
+                'labels' => $labels,
+                'nextDate' => $nextDate,
+                'previousDate' => $previousDate
+            ]
+        );
     }
 
     /**
