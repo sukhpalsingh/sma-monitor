@@ -41,7 +41,7 @@ class InverterLogController extends Controller
             ->orderBy('recorded_at', 'desc')
             ->first();
 
-        $first = $yesterday->total_yield;
+        $first = isset($yesterday) ? $yesterday->total_yield : 0;
 
         $total = 0;
         for ($i = 0; $i <= 24; $i++) {
