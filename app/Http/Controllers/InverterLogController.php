@@ -13,7 +13,7 @@ class InverterLogController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $first = 0;
         $data = [];
@@ -21,8 +21,16 @@ class InverterLogController extends Controller
 
         date_default_timezone_set(config('services.inverter.timezone'));
 
-        $today = Carbon::today()->startOfDay();
-        $yesterday = InverterLog::where('recorded_at', '<', $today)
+        if ($request->has('from')) {
+            $startDate = Carbon::createFromFormat('d-m-Y', $request->from)->startOfDay();
+            $endDate = $startDate->clone()->addWeek()->endOfDay();
+        } else {
+            $startDate = Carbon::today()->startOfDay();
+            $endDate = $startDate->clone()->endOfDay();
+        }
+
+        // get previous yield for comparison
+        $yesterday = InverterLog::where('recorded_at', '<', $startDate)
             ->orderBy('recorded_at', 'desc')
             ->first();
 
@@ -30,8 +38,8 @@ class InverterLogController extends Controller
 
         $total = 0;
         for ($i = 0; $i <= 24; $i++) {
-            $logs = InverterLog::where('recorded_at', '>=', $today->clone()->addHour($i)->format('Y-m-d H:i:s'))
-                ->where('recorded_at', '<', $today->clone()->addHour($i + 1)->format('Y-m-d H:i:s'))
+            $logs = InverterLog::where('recorded_at', '>=', $startDate->clone()->addHour($i)->format('Y-m-d H:i:s'))
+                ->where('recorded_at', '<', $startDate->clone()->addHour($i + 1)->format('Y-m-d H:i:s'))
                 ->get();
 
             $yield = 0;
@@ -43,11 +51,11 @@ class InverterLogController extends Controller
             $total += ($yield / 1000);
             $data[] = $yield / 1000;
 
-            $labels[] = $today->clone()->addHour($i)->format('H');
+            $labels[] = $startDate->clone()->addHour($i)->format('H');
         }
 
         $total = number_format($total, 2);
-        return view('inverter-logs', ['title' => Carbon::today()->format('d/m/Y') . ' (' . $total . ' KW)', 'logs' => $data, 'labels' => $labels]);
+        return view('inverter-logs', ['title' => $startDate->format('d/m/Y') . ' (' . $total . ' KW)', 'logs' => $data, 'labels' => $labels]);
     }
 
     /**
