@@ -25,7 +25,9 @@ class InverterLogController extends Controller
         if ($request->has('from')) {
             $startDate = Carbon::createFromFormat('d-m-Y', $request->from)->startOfDay();
             $endDate = $startDate->clone()->endOfDay();
+            $totalHours = 24;
         } else {
+            $totalHours = Carbon::now()->startOfHour()->format('H');
             $startDate = Carbon::today()->startOfDay();
             $endDate = $startDate->clone()->endOfDay();
         }
@@ -44,7 +46,8 @@ class InverterLogController extends Controller
         $first = isset($yesterday) ? $yesterday->total_yield : 0;
 
         $total = 0;
-        for ($i = 0; $i <= 24; $i++) {
+
+        for ($i = 0; $i <= $totalHours; $i++) {
             $logs = InverterLog::where('recorded_at', '>=', $startDate->clone()->addHour($i)->format('Y-m-d H:i:s'))
                 ->where('recorded_at', '<', $startDate->clone()->addHour($i + 1)->format('Y-m-d H:i:s'))
                 ->get();
