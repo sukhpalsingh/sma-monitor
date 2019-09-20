@@ -30,11 +30,6 @@ class InverterLogController extends Controller
             $totalHours = Carbon::now()->startOfHour()->format('H');
             $startDate = Carbon::today()->startOfDay();
             $endDate = $startDate->clone()->endOfDay();
-
-            // include next hour after 5 minutes from start of hour
-            if (Carbon::now()->startOfHour()->diffInMinutes(Carbon::now()) > 5) {
-                $totalHours += 1;
-            }
         }
 
         $nextDate = null;
@@ -53,7 +48,7 @@ class InverterLogController extends Controller
         $total = 0;
 
         for ($i = 0; $i <= 24; $i++) {
-            $labels[] = $startDate->clone()->addHours($i)->format('H');
+            $labels[] = $startDate->clone()->addHours($i + 1)->format('H');
 
             if ($i > $totalHours) {
                 continue;
