@@ -48,8 +48,8 @@ class InverterLogController extends Controller
         $total = 0;
 
         for ($i = 0; $i <= $totalHours; $i++) {
-            $logs = InverterLog::where('recorded_at', '>=', $startDate->clone()->addHour($i)->format('Y-m-d H:i:s'))
-                ->where('recorded_at', '<', $startDate->clone()->addHour($i + 1)->format('Y-m-d H:i:s'))
+            $logs = InverterLog::where('recorded_at', '>=', $startDate->clone()->addHours($i)->format('Y-m-d H:i:s'))
+                ->where('recorded_at', '<', $startDate->clone()->addHours($i + 1)->format('Y-m-d H:i:s'))
                 ->get();
 
             $yield = 0;
@@ -61,7 +61,7 @@ class InverterLogController extends Controller
             $total += ($yield / 1000);
             $data[] = $yield / 1000;
 
-            $labels[] = $startDate->clone()->addHour($i)->format('H');
+            $labels[] = $startDate->clone()->addHours($i)->format('H');
         }
 
         $total = number_format($total, 2);
