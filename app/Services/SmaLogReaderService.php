@@ -106,13 +106,14 @@ class SmaLogReaderService
     {
         date_default_timezone_set(config('services.inverter.timezone'));
 
-        $start = Carbon::now();
-        $start->startOfHour();
-
-        $end = $start->clone()->endOfHour();
-
-        $startTime = $start->getTimestamp();
-        $endTime = $end->getTimestamp();
+        $startTime = Carbon::now()
+            ->startOfMinute()
+            ->subMinutes(30)
+            ->getTimestamp();
+        $endTime = Carbon::now()
+            ->startOfMinute()
+            ->addMinutes(5)
+            ->getTimestamp();
 
         return $this->getMinutesLog($startTime, $endTime);
     }
