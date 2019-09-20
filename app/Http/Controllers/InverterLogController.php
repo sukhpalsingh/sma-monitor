@@ -50,7 +50,7 @@ class InverterLogController extends Controller
         for ($i = 0; $i <= 24; $i++) {
             $labels[] = $startDate->clone()->addHours($i)->format('H');
 
-            if ($i <= $totalHours) {
+            if ($i > $totalHours) {
                 continue;
             }
 
