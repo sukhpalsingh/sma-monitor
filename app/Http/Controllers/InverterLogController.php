@@ -42,7 +42,7 @@ class InverterLogController extends Controller
             [
                 'title' => $startDate->format('d/m/Y') . ' (' . $dailyLogs['total'] . ' KW)',
                 'logs' => $dailyLogs['data'],
-                'labels' => $$dailyLogs['labels'],
+                'labels' => $dailyLogs['labels'],
                 'nextDate' => $nextDate,
                 'previousDate' => $previousDate
             ]
