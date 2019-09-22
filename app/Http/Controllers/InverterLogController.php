@@ -16,10 +16,6 @@ class InverterLogController extends Controller
      */
     public function index(InverterLogRequest $request)
     {
-        $first = 0;
-        $data = [];
-        $labels = [];
-
         date_default_timezone_set(config('services.inverter.timezone'));
 
         if ($request->has('from')) {
@@ -32,49 +28,21 @@ class InverterLogController extends Controller
             $endDate = $startDate->clone()->endOfDay();
         }
 
+        $dailyLogs = $this->getDailyLogs($startDate, $totalHours);
+
+        // retrieve next and previous dates
         $nextDate = null;
         $previousDate = $startDate->clone()->subDay()->format('d-m-Y');
         if ($endDate->lessThan(Carbon::today()->endOfDay())) {
             $nextDate = $endDate->clone()->addDay()->format('d-m-Y');
         }
 
-        // get previous yield for comparison
-        $yesterday = InverterLog::where('recorded_at', '<', $startDate)
-            ->orderBy('recorded_at', 'desc')
-            ->first();
-
-        $first = isset($yesterday) ? $yesterday->total_yield : 0;
-
-        $total = 0;
-
-        for ($i = 0; $i <= 24; $i++) {
-            $labels[] = $startDate->clone()->addHours($i + 1)->format('H');
-
-            if ($i > $totalHours) {
-                continue;
-            }
-
-            $logs = InverterLog::where('recorded_at', '>=', $startDate->clone()->addHours($i)->format('Y-m-d H:i:s'))
-                ->where('recorded_at', '<', $startDate->clone()->addHours($i + 1)->format('Y-m-d H:i:s'))
-                ->get();
-
-            $yield = 0;
-            foreach ($logs as $index => $log) {
-                $yield += $log['total_yield'] - $first;
-                $first = $log['total_yield'];
-            }
-
-            $total += ($yield / 1000);
-            $data[] = $yield / 1000;
-        }
-
-        $total = number_format($total, 2);
         return view(
             'inverter-logs',
             [
-                'title' => $startDate->format('d/m/Y') . ' (' . $total . ' KW)',
-                'logs' => $data,
-                'labels' => $labels,
+                'title' => $startDate->format('d/m/Y') . ' (' . $dailyLogs['total'] . ' KW)',
+                'logs' => $dailyLogs['data'],
+                'labels' => $$dailyLogs['labels'],
                 'nextDate' => $nextDate,
                 'previousDate' => $previousDate
             ]
@@ -113,12 +81,14 @@ class InverterLogController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  string  $date
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($date)
     {
-        //
+        $startDate = Carbon::createFromFormat('Y-m-d', $date)->startOfDay();
+        $dailyLogs = $this->getDailyLogs($startDate, 24);
+        return response()->json($dailyLogs);
     }
 
     /**
@@ -130,5 +100,51 @@ class InverterLogController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    /**
+     * Get daily logs
+     */
+    private function getDailyLogs($startDate, $totalHours)
+    {
+        $data = [];
+        $labels = [];
+        $total = 0;
+
+        // get previous yield for comparison
+        $yesterday = InverterLog::where('recorded_at', '<', $startDate)
+            ->orderBy('recorded_at', 'desc')
+            ->first();
+
+        $first = isset($yesterday) ? $yesterday->total_yield : 0;
+
+        for ($i = 0; $i <= 24; $i++) {
+            $labels[] = $startDate->clone()->addHours($i + 1)->format('H');
+
+            if ($i > $totalHours) {
+                continue;
+            }
+
+            $logs = InverterLog::where('recorded_at', '>=', $startDate->clone()->addHours($i)->format('Y-m-d H:i:s'))
+                ->where('recorded_at', '<', $startDate->clone()->addHours($i + 1)->format('Y-m-d H:i:s'))
+                ->get();
+
+            $yield = 0;
+            foreach ($logs as $index => $log) {
+                $yield += $log['total_yield'] - $first;
+                $first = $log['total_yield'];
+            }
+
+            $total += ($yield / 1000);
+            $data[] = $yield / 1000;
+        }
+
+        $total = number_format($total, 2);
+
+        return [
+            'total' => $total,
+            'data' => $data,
+            'labels' => $labels
+        ];
     }
 }
