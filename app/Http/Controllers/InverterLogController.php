@@ -37,6 +37,18 @@ class InverterLogController extends Controller
             $nextDate = $endDate->clone()->addDay()->format('d-m-Y');
         }
 
+        // $currentHour = Carbon::now()->format('H');
+        // if ($currentHour <= 5 || $currentHour >= 19) {
+        //     $theme = 'night';
+        // } elseif ($currentHour <= 7) {
+        //     $theme = 'sunrise';
+        // } elseif ($currentHour >= 5) {
+        //     $theme = 'sunset';
+        // } else {
+        //     $theme = 'day';
+        // }
+        $theme = 'day';
+
         return view(
             'inverter-logs',
             [
@@ -44,7 +56,8 @@ class InverterLogController extends Controller
                 'logs' => $dailyLogs['data'],
                 'labels' => $dailyLogs['labels'],
                 'nextDate' => $nextDate,
-                'previousDate' => $previousDate
+                'previousDate' => $previousDate,
+                'theme' => $theme,
             ]
         );
     }
