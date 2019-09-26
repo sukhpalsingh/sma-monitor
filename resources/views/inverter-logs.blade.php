@@ -8,7 +8,7 @@
         <title>SMA Monitor</title>
     </head>
 
-    <body>
+    <body class="{{ $theme }}">
         <div class="container-fluid">
             <div class="row">
                 <a href="/?from={{ $previousDate }}" class="btn btn-default"><</a>
@@ -17,7 +17,7 @@
                     <a href="/?from={{ $nextDate }}" class="btn btn-default">></a>
                 @endif
             </div>
-            <div class="chart-container" style="position: relative; height:20vh; width: 50vw; margin: 20px auto;">
+            <div class="chart-container" style="position: relative; margin: 30% auto;">
                 <canvas id="myChart"></canvas>
             </div>
         </div>
@@ -25,6 +25,16 @@
         <script src="js/lib.js" type="text/javascript"></script>
         <link rel="stylesheet" type="text/css" href="/css/app.css">
         <script>
+            var screenWidth = $(window).width();
+            var screenHeight = $(window).height();
+
+            var chartWidth = screenWidth / 1.5;
+            var chartHeight = screenHeight / 3;
+
+            $('.chart-container').css('width', chartWidth);
+            $('.chart-container').css('height', chartHeight);
+            $('.chart-container').css('marginTop', chartHeight * 1.7);
+
             var ctx = document.getElementById('myChart');
             var myChart = new Chart(ctx, {
                 type: 'line',
@@ -34,10 +44,15 @@
                     datasets: [{
                         label: '{{ $title }}',
                         data: {{ json_encode($logs, true) }},
+                        backgroundColor: [
+                            "#709000",
+                        ]
                     }],
                    
                 },
+                
                 options: {
+                    maintainAspectRatio: false,
                     responsive: true,
                     scales: {
                         xAxes: [{
@@ -45,7 +60,7 @@
                             scaleLabel: {
                                 display: true,
                                 labelString: 'Month'
-                            },
+                            }
                         }],
                         yAxes: [{
                             display: true,
