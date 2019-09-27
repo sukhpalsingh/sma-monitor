@@ -20,4 +20,10 @@ mix.scripts(
     )
     .js('resources/js/app.js', 'public/js')
     .copy('resources/css/app.css', 'public/css')
+    .styles(
+        [
+            'node_modules/bootstrap/dist/css/bootstrap.min.css',
+        ],
+        'public/css/lib.css'
+    )
     mix.copyDirectory('resources/img', 'public/img');;

@@ -30,6 +30,10 @@ class DailyInverterLogger
      */
     public function handle()
     {
+        if (env('ENVIRONMENT') === 'prod') {
+            return;
+        }
+
         $data = SmaLogReaderService::getLastLog();
         InverterLogService::send($data);
     }

@@ -11,6 +11,10 @@ class WeatherService
 
     public static function getCurrentWeather()
     {
+        if (env('ENVIRONMENT') !== 'prod') {
+            return;
+        }
+
         date_default_timezone_set(config('services.inverter.timezone'));
 
         $apiKey = config('services.weather.key');
