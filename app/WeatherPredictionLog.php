@@ -30,4 +30,13 @@ class WeatherPredictionLog extends Model
         'is_day',
         'recorded_at'
     ];
+
+    /**
+     * The attributes that should be mutated to dates.
+     *
+     * @var array
+     */
+    protected $dates = [
+        'recorded_at',
+    ];
 }

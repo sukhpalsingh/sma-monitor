@@ -34,60 +34,17 @@
                                 </div>
                             </div>
                             <div class="future">
-                                <div class="day">
-                                    <h5>{{ Carbon\Carbon::now()->startOfHour()->addHours(1)->format('h:i') }}</h5>
-                                    <p>
-                                        <img src="https://developer.accuweather.com/sites/default/files/{{ $currentWeather->weather_icon < 9 ? '0' : '' }}{{ $currentWeather->weather_icon }}-s.png" />
-                                    </p>
-                                </div>
-                                <div class="day">
-                                    <h5>{{ Carbon\Carbon::now()->startOfHour()->addHours(2)->format('h:i') }}</h5>
-                                    <p>
-                                        <img src="https://developer.accuweather.com/sites/default/files/{{ $currentWeather->weather_icon < 9 ? '0' : '' }}{{ $currentWeather->weather_icon }}-s.png" />
-                                    </p>
-                                </div>
-                                <div class="day">
-                                    <h5>{{ Carbon\Carbon::now()->startOfHour()->addHours(3)->format('h:i') }}</h5>
-                                    <p>
-                                        <img src="https://developer.accuweather.com/sites/default/files/{{ $currentWeather->weather_icon < 9 ? '0' : '' }}{{ $currentWeather->weather_icon }}-s.png" />
-                                    </p>
-                                </div>
-                                <div class="day">
-                                    <h5>{{ Carbon\Carbon::now()->startOfHour()->addHours(4)->format('h:i') }}</h5>
-                                    <p>
-                                        <img src="https://developer.accuweather.com/sites/default/files/{{ $currentWeather->weather_icon < 9 ? '0' : '' }}{{ $currentWeather->weather_icon }}-s.png" />
-                                    </p>
-                                </div>
-                                <div class="day">
-                                    <h5>{{ Carbon\Carbon::now()->startOfHour()->addHours(5)->format('h:i') }}</h5>
-                                    <p>
-                                        <img src="https://developer.accuweather.com/sites/default/files/{{ $currentWeather->weather_icon < 9 ? '0' : '' }}{{ $currentWeather->weather_icon }}-s.png" />
-                                    </p>
-                                </div>
-                                <div class="day">
-                                    <h5>{{ Carbon\Carbon::now()->startOfHour()->addHours(6)->format('h:i') }}</h5>
-                                    <p>
-                                        <img src="https://developer.accuweather.com/sites/default/files/{{ $currentWeather->weather_icon < 9 ? '0' : '' }}{{ $currentWeather->weather_icon }}-s.png" />
-                                    </p>
-                                </div>
-                                <div class="day">
-                                    <h5>{{ Carbon\Carbon::now()->startOfHour()->addHours(7)->format('h:i') }}</h5>
-                                    <p>
-                                        <img src="https://developer.accuweather.com/sites/default/files/{{ $currentWeather->weather_icon < 9 ? '0' : '' }}{{ $currentWeather->weather_icon }}-s.png" />
-                                    </p>
-                                </div>
-                                <div class="day">
-                                    <h5>{{ Carbon\Carbon::now()->startOfHour()->addHours(8)->format('h:i') }}</h5>
-                                    <p>
-                                        <img src="https://developer.accuweather.com/sites/default/files/{{ $currentWeather->weather_icon < 9 ? '0' : '' }}{{ $currentWeather->weather_icon }}-s.png" />
-                                    </p>
-                                </div>
-                                <div class="day">
-                                    <h5>{{ Carbon\Carbon::now()->startOfHour()->addHours(9)->format('h:i') }}</h5>
-                                    <p>
-                                        <img src="https://developer.accuweather.com/sites/default/files/{{ $currentWeather->weather_icon < 9 ? '0' : '' }}{{ $currentWeather->weather_icon }}-s.png" />
-                                    </p>
-                                </div>
+                                @foreach ($weatherPredictionLogs as $weatherPredictionLog)
+                                    <div class="day">
+                                        <h5>{{ $weatherPredictionLog->recorded_at->format('h:i') }}</h5>
+                                        <p>
+                                            <img src="https://developer.accuweather.com/sites/default/files/{{ $weatherPredictionLog->weather_icon < 9 ? '0' : '' }}{{ $weatherPredictionLog->weather_icon }}-s.png" />
+                                        </p>
+                                        <p>
+                                            <div class="temp">{{ $weatherPredictionLog->temperature }}&deg; <small>C</small></div>
+                                        </p>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>
