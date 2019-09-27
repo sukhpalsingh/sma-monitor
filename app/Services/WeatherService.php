@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\WeatherLog;
+use App\WeatherPredictionLog;
 use GuzzleHttp\Client;
 use Illuminate\Support\Carbon;
 
@@ -78,22 +79,24 @@ class WeatherService
             return [];
         }
 
+        WeatherPredictionLog::truncate();
         $locationsWeather = json_decode($response->getBody()->getContents(), true);
 
         $weatherData = [];
         foreach ($locationsWeather as $locationWeather) {
-            $weatherData[] = [
-                'recorded_at' => $locationsWeather['DateTime'],
+            $weatherData[] = $locationWeather;
+            WeatherPredictionLog::create([
                 'temperature' => $locationWeather['Temperature']['Value'], // celcius
-                'weather_icon' => $locationWeather['WeatherIcon'],
                 'real_feel_temperature' => $locationWeather['RealFeelTemperature']['Value'], // celcius
+                'weather_icon' => $locationWeather['WeatherIcon'],
                 'humidity' => $locationWeather['RelativeHumidity'],
                 'wind_speed' => $locationWeather['Wind']['Speed']['Value'], // km/h,
                 'uv_index' => $locationWeather['UVIndex'],
                 'cloud_cover' => $locationWeather['CloudCover'], // %
                 'last_hour_rain' => $locationWeather['TotalLiquid']['Value'], // mm
-                'is_day_light' => $locationWeather['IsDaylight']
-            ];
+                'is_day' => $locationWeather['IsDaylight'],
+                'recorded_at' => new Carbon($locationWeather['DateTime']),
+            ]);
         }
 
         return $weatherData;
