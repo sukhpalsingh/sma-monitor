@@ -38,8 +38,8 @@ class InverterLogController extends Controller
             $nextDate = $endDate->clone()->addDay()->format('d-m-Y');
         }
 
-        $currentWeather = WeatherLog::where('recorded_at', '>=', Carbon::now()->startOfHour())
-            ->orWhere('recorded_at', '>=', Carbon::now()->endOfHour())
+        $currentWeather = WeatherLog::where('recorded_at', '>=', Carbon::now()->startOfHour()->subHours(20))
+            ->orderBy('recorded_at', 'desc')
             ->first();
 
         // $currentHour = Carbon::now()->format('H');
