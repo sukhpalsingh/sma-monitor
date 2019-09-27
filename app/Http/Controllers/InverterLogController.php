@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\InverterLogRequest;
 use App\InverterLog;
+use App\WeatherLog;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -37,6 +38,10 @@ class InverterLogController extends Controller
             $nextDate = $endDate->clone()->addDay()->format('d-m-Y');
         }
 
+        $currentWeather = WeatherLog::where('recorded_at', '>=', Carbon::now()->subHours(2)->startOfHour())
+            ->orWhere('recorded_at', '>=', Carbon::now()->endOfHour())
+            ->first();
+
         // $currentHour = Carbon::now()->format('H');
         // if ($currentHour <= 5 || $currentHour >= 19) {
         //     $theme = 'night';
@@ -58,6 +63,7 @@ class InverterLogController extends Controller
                 'nextDate' => $nextDate,
                 'previousDate' => $previousDate,
                 'theme' => $theme,
+                'currentWeather' => $currentWeather
             ]
         );
     }
