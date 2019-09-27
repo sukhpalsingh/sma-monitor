@@ -50,5 +50,11 @@ return [
         'password' => env('INVERTER_PASSWORD'),
         'result_code' => env('INVERTER_RESULT_CODE'),
         'timezone' => env('INVERTER_TIMEZONE', 'Australia/Sydney')
+    ],
+
+    'weather' => [
+        'url' => 'http://dataservice.accuweather.com',
+        'key' => env('WEATHER_API_KEY'),
+        'location_key' => env('WEATHER_API_LOCATION_KEY'),
     ]
 ];
