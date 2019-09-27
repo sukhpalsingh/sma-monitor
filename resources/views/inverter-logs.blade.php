@@ -17,7 +17,7 @@
                     <a href="/?from={{ $nextDate }}" class="btn btn-default">></a>
                 @endif
             </div>
-            <div class="chart-container" style="position: relative; margin: 30% auto;">
+            <div class="chart-container" style="position: relative; margin: 0px auto auto;">
                 <canvas id="myChart"></canvas>
             </div>
         </div>
