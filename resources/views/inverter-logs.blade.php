@@ -26,7 +26,12 @@
                                     <div>&nbsp;</div>
                                     <div class="city"><small><small>{{ Carbon\Carbon::now()->format('D d-m-Y') }}</small></small></div>
                                     <div class="temp">{{ $currentWeather->temperature }}&deg; <small>C</small></div>
-                                    <div class="wind"><small><small>WIND:</small></small> {{ $currentWeather->wind_speed }} km/h</div>
+                                    <div class="wind">
+                                        <small><small>Humidity:</small></small> {{ $currentWeather->humidity }}
+                                        @if ($currentWeather->last_hour_rain > 0)
+                                            <small class="ml-2"><small>Rain:</small></small> {{ $currentWeather->last_hour_rain }} mm
+                                        @endif
+                                    </div>
                                     <div>&nbsp;</div>
                                 </div>
                                 <div class="icon">
@@ -41,7 +46,12 @@
                                             <img src="https://developer.accuweather.com/sites/default/files/{{ $weatherPredictionLog->weather_icon < 9 ? '0' : '' }}{{ $weatherPredictionLog->weather_icon }}-s.png" />
                                         </p>
                                         <p>
-                                            <div class="temp">{{ $weatherPredictionLog->temperature }}&deg; <small>C</small></div>
+                                            <div class="temp">
+                                                {{ $weatherPredictionLog->temperature }}&deg; <small>C</small>
+                                            </div>
+                                            @if ($weatherPredictionLog->last_hour_rain > 0)
+                                                <small class="ml-2">{{ $weatherPredictionLog->last_hour_rain }} mm</small>
+                                            @endif
                                         </p>
                                     </div>
                                 @endforeach
@@ -62,12 +72,12 @@
             var screenWidth = $(window).width();
             var screenHeight = $(window).height();
 
-            var chartWidth = screenWidth / 1.5;
+            var chartWidth = screenWidth / 1.2;
             var chartHeight = screenHeight / 3;
 
             $('.chart-container').css('width', chartWidth);
             $('.chart-container').css('height', chartHeight);
-            $('.chart-container').css('marginTop', chartHeight * 1.7);
+            $('.chart-container').css('marginTop', chartHeight * 1.9);
             $('.chart-container').css('marginLeft', (screenWidth - chartWidth) / 2);
 
             $('#weather-container').css('width', chartWidth);
