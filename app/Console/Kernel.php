@@ -32,7 +32,7 @@ class Kernel extends ConsoleKernel
         })->hourly();
         $schedule->call(function() {
             WeatherService::getForecastWeather();
-        })->twiceDaily(1, 13);
+        })->hourly();
         // $schedule->command('inspire')
         //          ->hourly();
     }
