@@ -43,8 +43,13 @@ class InverterLogController extends Controller
         $currentWeather = WeatherLog::where('recorded_at', '>=', Carbon::now()->startOfHour()->subHour())
             ->orderBy('recorded_at', 'desc')
             ->first();
+        
+        $checkingHour = Carbon::now()->startOfHour();
+        if ($checkingHour->hour > 16) {
+            $checkingHour->setHours(16);
+        }
 
-        $weatherPredictionLogs = WeatherPredictionLog::where('recorded_at', '>=', Carbon::now()->startOfHour())
+        $weatherPredictionLogs = WeatherPredictionLog::where('recorded_at', '>=', $checkingHour)
             ->orderBy('recorded_at')
             ->limit(9)
             ->get();
