@@ -187,10 +187,10 @@ class InverterLogController extends Controller
         );
     }
 
-    private function showWeeklyUsage(Carbon $startDate)
+    private function showWeeklyUsage(Carbon $checkDate)
     {
-        $startDate = $startDate->startOfWeek()->subWeek();
-        $endDate = $startDate->clone()->endOfWeek();
+        $startDate = $checkDate->clone()->startOfWeek()->subWeek();
+        $endDate = $checkDate->clone()->endOfWeek();
 
         $previousDate = $startDate->clone()->subWeek()->format('d-m-y');
         $nextDate = $endDate->clone()->addWeek()->format('d-m-y');
@@ -204,7 +204,7 @@ class InverterLogController extends Controller
         $first = isset($yesterday) ? $yesterday->total_yield : 0;
 
         $logs = InverterLog::where('recorded_at', '>=', $startDate)
-            ->where('recorded_at', '<', $endDate)
+            ->where('recorded_at', '<=', $endDate)
             ->orderBy('recorded_at', 'asc')
             ->get();
 
@@ -219,7 +219,7 @@ class InverterLogController extends Controller
 
             if ($log->recorded_at->clone()->startOfDay()->greaterThan($currentLogDate)) {
                 $data[] = $totalYieldForDay / 1000;
-                $labels[] = $currentLogDate->format('d/m');
+                $labels[] = $currentLogDate->format('D d/m');
 
                 $totalYieldForDay = 0;
                 $currentLogDate = $log->recorded_at->clone()->startOfDay();
@@ -229,7 +229,7 @@ class InverterLogController extends Controller
 
         // add remaining entry
         $data[] = $totalYieldForDay / 1000;
-        $labels[] = $currentLogDate->format('d/m');
+        $labels[] = $currentLogDate->format('D d/m');
         $backgroundColors[] = '#709000';
 
         $currentWeather = WeatherLog::where('recorded_at', '>=', Carbon::now()->startOfHour()->subHour())
