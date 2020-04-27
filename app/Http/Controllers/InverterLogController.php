@@ -23,62 +23,17 @@ class InverterLogController extends Controller
 
         if ($request->has('from')) {
             $startDate = Carbon::createFromFormat('d-m-Y', $request->from)->startOfDay();
-            $endDate = $startDate->clone()->endOfDay();
             $totalHours = 24;
         } else {
             $totalHours = Carbon::now()->startOfHour()->format('H');
             $startDate = Carbon::today()->startOfDay();
-            $endDate = $startDate->clone()->endOfDay();
         }
 
-        $dailyLogs = $this->getDailyLogs($startDate, $totalHours);
-
-        // retrieve next and previous dates
-        $nextDate = null;
-        $previousDate = $startDate->clone()->subDay()->format('d-m-Y');
-        if ($endDate->lessThan(Carbon::today()->endOfDay())) {
-            $nextDate = $endDate->clone()->addDay()->format('d-m-Y');
+        if (Carbon::now()->hour < 7 || Carbon::now()->hour > 19) {
+            return $this->showWeeklyUsage($startDate);
         }
 
-        $currentWeather = WeatherLog::where('recorded_at', '>=', Carbon::now()->startOfHour()->subHour())
-            ->orderBy('recorded_at', 'desc')
-            ->first();
-        
-        $checkingHour = Carbon::now()->startOfHour();
-        if ($checkingHour->hour > 16) {
-            $checkingHour->setHours(16);
-        }
-
-        $weatherPredictionLogs = WeatherPredictionLog::where('recorded_at', '>=', $checkingHour)
-            ->orderBy('recorded_at')
-            ->limit(9)
-            ->get();
-
-        // $currentHour = Carbon::now()->format('H');
-        // if ($currentHour <= 5 || $currentHour >= 19) {
-        //     $theme = 'night';
-        // } elseif ($currentHour <= 7) {
-        //     $theme = 'sunrise';
-        // } elseif ($currentHour >= 5) {
-        //     $theme = 'sunset';
-        // } else {
-        //     $theme = 'day';
-        // }
-        $theme = 'day';
-
-        return view(
-            'inverter-logs',
-            [
-                'title' => $startDate->format('d/m/Y') . ' (' . $dailyLogs['total'] . ' KW)',
-                'logs' => $dailyLogs['data'],
-                'labels' => $dailyLogs['labels'],
-                'nextDate' => $nextDate,
-                'previousDate' => $previousDate,
-                'theme' => $theme,
-                'currentWeather' => $currentWeather,
-                'weatherPredictionLogs' => $weatherPredictionLogs
-            ]
-        );
+        return $this->showDayUsage($startDate, $totalHours);
     }
 
     /**
@@ -178,5 +133,132 @@ class InverterLogController extends Controller
             'data' => $data,
             'labels' => $labels
         ];
+    }
+
+    private function showDayUsage($startDate, $totalHours) {
+        $endDate = $startDate->clone()->endOfDay();
+        $dailyLogs = $this->getDailyLogs($startDate, $totalHours);
+
+        // retrieve next and previous dates
+        $nextDate = null;
+        $previousDate = $startDate->clone()->subDay()->format('d-m-Y');
+        if ($endDate->lessThan(Carbon::today()->endOfDay())) {
+            $nextDate = $endDate->clone()->addDay()->format('d-m-Y');
+        }
+
+        $currentWeather = WeatherLog::where('recorded_at', '>=', Carbon::now()->startOfHour()->subHour())
+            ->orderBy('recorded_at', 'desc')
+            ->first();
+        
+        $checkingHour = Carbon::now()->startOfHour();
+        if ($checkingHour->hour > 16) {
+            $checkingHour->setHours(16);
+        }
+
+        $weatherPredictionLogs = WeatherPredictionLog::where('recorded_at', '>=', $checkingHour)
+            ->orderBy('recorded_at')
+            ->limit(9)
+            ->get();
+
+        // $currentHour = Carbon::now()->format('H');
+        // if ($currentHour <= 5 || $currentHour >= 19) {
+        //     $theme = 'night';
+        // } elseif ($currentHour <= 7) {
+        //     $theme = 'sunrise';
+        // } elseif ($currentHour >= 5) {
+        //     $theme = 'sunset';
+        // } else {
+        //     $theme = 'day';
+        // }
+        $theme = 'day';
+
+        return view(
+            'inverter-logs',
+            [
+                'title' => $startDate->format('d/m/Y') . ' (' . $dailyLogs['total'] . ' KW)',
+                'logs' => $dailyLogs['data'],
+                'labels' => $dailyLogs['labels'],
+                'nextDate' => $nextDate,
+                'previousDate' => $previousDate,
+                'theme' => $theme,
+                'currentWeather' => $currentWeather,
+                'weatherPredictionLogs' => $weatherPredictionLogs
+            ]
+        );
+    }
+
+    private function showWeeklyUsage(Carbon $startDate)
+    {
+        $startDate = $startDate->startOfWeek()->subWeek();
+        $endDate = $startDate->clone()->endOfWeek();
+
+        $previousDate = $startDate->clone()->subWeek()->format('d-m-y');
+        $nextDate = $endDate->clone()->addWeek()->format('d-m-y');
+
+        // get previous yield for comparison
+        $yesterday = InverterLog::where('recorded_at', '<', $startDate)
+            ->where('recorded_at', '>=', $startDate->clone()->subDay()->startOfDay())
+            ->orderBy('recorded_at', 'desc')
+            ->first();
+
+        $first = isset($yesterday) ? $yesterday->total_yield : 0;
+
+        $logs = InverterLog::where('recorded_at', '>=', $startDate)
+            ->where('recorded_at', '<', $endDate)
+            ->orderBy('recorded_at', 'asc')
+            ->get();
+
+        $totalYieldForDay = 0;
+        $data = [];
+        $labels = [];
+        $currentLogDate = $startDate;
+        $backgroundColors = [];
+        foreach ($logs as $log) {
+            $totalYieldForDay += ($log->total_yield - $first);
+            $first = $log->total_yield;
+
+            if ($log->recorded_at->clone()->startOfDay()->greaterThan($currentLogDate)) {
+                $data[] = $totalYieldForDay / 1000;
+                $labels[] = $currentLogDate->format('d/m');
+
+                $totalYieldForDay = 0;
+                $currentLogDate = $log->recorded_at->clone()->startOfDay();
+                $backgroundColors[] = '#709000';
+            }
+        }
+
+        // add remaining entry
+        $data[] = $totalYieldForDay / 1000;
+        $labels[] = $currentLogDate->format('d/m');
+        $backgroundColors[] = '#709000';
+
+        $currentWeather = WeatherLog::where('recorded_at', '>=', Carbon::now()->startOfHour()->subHour())
+            ->orderBy('recorded_at', 'desc')
+            ->first();
+        
+        $checkingHour = Carbon::now()->startOfHour();
+        if ($checkingHour->hour > 16) {
+            $checkingHour->setHours(16);
+        }
+
+        $weatherPredictionLogs = WeatherPredictionLog::where('recorded_at', '>=', $checkingHour)
+            ->orderBy('recorded_at')
+            ->limit(9)
+            ->get();
+
+        return view(
+            'inverter-weekly-logs',
+            [
+                'title' => $startDate->format('d/m/Y') . ' - ' . $endDate->format('d/m/Y'),
+                'logs' => $data,
+                'labels' => $labels,
+                'backgroundColors' => $backgroundColors,
+                'nextDate' => $nextDate,
+                'previousDate' => $previousDate,
+                'theme' => 'day',
+                'currentWeather' => $currentWeather,
+                'weatherPredictionLogs' => $weatherPredictionLogs
+            ]
+        );
     }
 }
