@@ -10,10 +10,14 @@ Run migration
 php artisan migrate
 ```
 
-Create encryption keys and clients
-
+Create pasword grant client
 ```
-php artisan passport:install
+php artisan passport:client --password
+```
+
+Generate passport keys
+```
+php artisan passport:keys
 ```
 
 ## License
