@@ -218,7 +218,7 @@ class InverterLogController extends Controller
             $first = $log->total_yield;
 
             if ($log->recorded_at->clone()->startOfDay()->greaterThan($currentLogDate)) {
-                $data[] = $totalYieldForDay / 1000;
+                $data[] = (float) number_format($totalYieldForDay / 1000, 2);
                 $labels[] = $currentLogDate->format('D d/m');
 
                 $totalYieldForDay = 0;
@@ -228,7 +228,7 @@ class InverterLogController extends Controller
         }
 
         // add remaining entry
-        $data[] = $totalYieldForDay / 1000;
+        $data[] = (float) number_format(($totalYieldForDay / 1000), 2);
         $labels[] = $currentLogDate->format('D d/m');
         $backgroundColors[] = '#709000';
 
